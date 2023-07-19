@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Todo List</title>
+    <style>
+      .todo-container {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      .todo-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .todo-item input[type="text"] {
+        flex-grow: 1;
+        margin-right: 8px;
+      }
+      .todo-item button {
+        margin-left: 8px;
+      }
+      .btn,
+      .btnRemove {
+        color: white !important;
+        border: none !important;
+      }
+      .btnRemove {
+        padding: 5px 10px !important;
+        border-radius: 12px !important;
+        background-color: #ee3425 !important;
+      }
+      .btnAdd {
+        position: relative;
+        left: -4px;
+        padding: 5px 10px !important;
+        background-color: green !important;
+        border-radius: 0 12px 12px 0 !important;
+      }
+      .input {
+        min-width: 250px;
+        padding: 3px 10px !important;
+        border-radius: 5px 0 0 5px !important;
+      }
+      .inputRender {
+        min-width: 300px !important;
+        padding: 3px 10px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="todo-container" style="text-align: center">
+      <h1>To-Do List</h1>
+      <div>
+        <input
+          class="input"
+          type="text"
+          id="taskInput"
+          placeholder="Enter task"
+        />
+        <button class="btn btnAdd" onclick="addTask()">Add</button>
+      </div>
+      <ol id="taskList"></ol>
+    </div>
+
+    <script>
+      let tasks = [];
+
+      function fetchTasks() {
+        fetch("https://jsonplaceholder.typicode.com/todos")
+          .then((response) => response.json())
+          .then((data) => {
+            tasks = data.map((task) => ({
+              taskDetails: task.title,
+              id: task.id,
+            }));
+            renderTasks();
+          })
+          .catch((error) => {
+            console.error("Error fetching tasks:", error);
+          });
+      }
+
+      function renderTasks() {
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = "";
+
+        for (let i = 0; i < tasks.length; i++) {
+          const task = tasks[i];
+
+          const listItem = document.createElement("li");
+          listItem.innerHTML = `
+          <div class="todo-item">
+            <input class="inputRender" type="text" value="${task.taskDetails}" disabled>
+            <button class="btn btnRemove" onclick="removeTask(${task.id})">Remove</button>
+          </div>
+        `;
+
+          taskList.appendChild(listItem);
+        }
+      }
+
+      function addTask() {
+        const taskInput = document.getElementById("taskInput");
+        const taskDetails = taskInput.value.trim();
+
+        if (taskDetails !== "") {
+          const taskId = Date.now();
+          const newTask = { taskDetails, id: taskId };
+
+          tasks.push(newTask);
+          taskInput.value = "";
+          renderTasks();
+        }
+      }
+
+      function removeTask(taskId) {
+        const taskIndex = tasks.findIndex((task) => task.id === taskId);
+
+        if (taskIndex !== -1) {
+          tasks.splice(taskIndex, 1);
+          renderTasks();
+        }
+      }
+
+      fetchTasks();
+    </script>
+  </body>
+</html>
